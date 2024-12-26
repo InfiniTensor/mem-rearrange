@@ -11,3 +11,5 @@
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/InfiniTensor/mem-rearrange)](https://github.com/InfiniTensor/mem-rearrange/pulls)
 ![GitHub contributors](https://img.shields.io/github/contributors/InfiniTensor/mem-rearrange)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/InfiniTensor/mem-rearrange)
+
+根据布局参数重排数据。可以将数据从一个高维数组中转移到另一个具有不同存储布局的高维数组中。

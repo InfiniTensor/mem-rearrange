@@ -1,5 +1,5 @@
 #![doc = include_str!("../README.md")]
-#![deny(warnings)]
+#![deny(warnings, missing_docs)]
 
 use itertools::izip;
 use ndarray_layout::ArrayLayout;
@@ -8,19 +8,24 @@ use std::{cmp::Ordering, ptr::copy_nonoverlapping};
 
 pub extern crate ndarray_layout;
 
+/// 存储重排任务对象。
 // Layout: | unit | dst offset | src offset | count | idx strides | dst strides | src strides |
 #[derive(Clone, Debug)]
 #[repr(transparent)]
 pub struct Rearranging(Box<[isize]>);
 
+/// 重拍方案异常。
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
 pub enum SchemeError {
+    /// 输入输出布局形状不一致。
     ShapeMismatch,
+    /// 输出布局中含有广播维度，导致写规约。
     DimReduce,
 }
 
 impl Rearranging {
+    /// 从输出布局、输入布局和单元规模构造重排方案。
     pub fn new<const M: usize, const N: usize>(
         dst: &ArrayLayout<M>,
         src: &ArrayLayout<N>,
@@ -117,49 +122,58 @@ impl Rearranging {
         Ok(ans)
     }
 
+    /// 执行方案维数。
     #[inline]
     pub fn ndim(&self) -> usize {
         (self.0.len() - 4) / 3
     }
 
+    /// 读写单元规模。
     #[inline]
     pub fn unit(&self) -> usize {
         self.0[0] as _
     }
 
+    /// 输出基址偏移。
     #[inline]
     pub fn dst_offset(&self) -> isize {
         self.0[1]
     }
 
+    /// 输入基址偏移。
     #[inline]
     pub fn src_offset(&self) -> isize {
         self.0[2]
     }
 
+    /// 读写单元数量。
     #[inline]
     pub fn count(&self) -> usize {
         self.0[3] as _
     }
 
+    /// 索引步长。
     #[inline]
     pub fn idx_strides(&self) -> &[isize] {
         let ndim = self.ndim();
         &self.0[4..][..ndim]
     }
 
+    /// 输出数据步长。
     #[inline]
     pub fn dst_strides(&self) -> &[isize] {
         let ndim = self.ndim();
         &self.0[4 + ndim..][..ndim]
     }
 
+    /// 输入数据步长。
     #[inline]
     pub fn src_strides(&self) -> &[isize] {
         let ndim = self.ndim();
         &self.0[4 + ndim * 2..][..ndim]
     }
 
+    /// 计算方案涉及的形状。
     pub fn shape(&self) -> impl Iterator<Item = usize> + '_ {
         let ndim = self.ndim();
         self.0[3..][..ndim + 1]
@@ -167,6 +181,8 @@ impl Rearranging {
             .map(|pair| (pair[0] / pair[1]) as usize)
     }
 
+    /// 执行存储重排。
+    ///
     /// # Safety
     ///
     /// `dst` and `src` must be valid pointers and must able to access with the scheme.

@@ -1,14 +1,15 @@
 [package]
 name = "mem-rearrange"
-description = "TODO"
+description = "Rearrange memory from one array to another of different storage layouts"
 version = "0.0.0"
 edition = "2021"
 authors = ["YdrMaster <ydrml@hotmail.com>"]
 repository = "https://github.com/InfiniTensor/mem-rearrange"
 documentation = "https://docs.rs/mem-rearrange"
 license = "MIT"
-readme = "../README.md"
-keywords = ["TODO"]
+readme = "README.md"
+keywords = ["rearrange", "ndarray"]
+categories = ["algorithms"]
 
 [dependencies]
 ndarray-layout = "0.0"
