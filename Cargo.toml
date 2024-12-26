@@ -1,0 +1,16 @@
+[package]
+name = "mem-rearrange"
+description = "TODO"
+version = "0.0.0"
+edition = "2021"
+authors = ["YdrMaster <ydrml@hotmail.com>"]
+repository = "https://github.com/InfiniTensor/mem-rearrange"
+documentation = "https://docs.rs/mem-rearrange"
+license = "MIT"
+readme = "../README.md"
+keywords = ["TODO"]
+
+[dependencies]
+ndarray-layout = "0.0"
+itertools = "0.13"
+rayon = "1.10"
