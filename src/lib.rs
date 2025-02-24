@@ -14,7 +14,7 @@ pub extern crate ndarray_layout;
 #[repr(transparent)]
 pub struct Rearranging(Box<[isize]>);
 
-/// 重拍方案异常。
+/// 重排方案异常。
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
 pub enum SchemeError {
@@ -113,11 +113,11 @@ impl Rearranging {
         layout[ndim] = 1;
         for (i, Dim { len, dst, src }) in dims.into_iter().filter(|d| d.len != 1).enumerate() {
             layout[i] = len as _;
-            layout[1 + ndim + i] = dst;
-            layout[1 + ndim * 2 + i] = src;
+            layout[i + 1 + ndim] = dst;
+            layout[i + 1 + ndim * 2] = src;
         }
         for i in (1..=ndim).rev() {
-            layout[i - 1] *= layout[i];
+            layout[i - 1] *= layout[i]
         }
         Ok(ans)
     }
@@ -187,10 +187,10 @@ impl Rearranging {
     ///
     /// `dst` and `src` must be valid pointers and must able to access with the scheme.
     pub unsafe fn launch(&self, dst: *mut u8, src: *const u8) {
-        let dst = dst.byte_offset(self.dst_offset());
-        let src = src.byte_offset(self.src_offset());
+        let dst = unsafe { dst.byte_offset(self.dst_offset()) };
+        let src = unsafe { src.byte_offset(self.src_offset()) };
         match self.count() {
-            1 => copy_nonoverlapping(src, dst, self.unit()),
+            1 => unsafe { copy_nonoverlapping(src, dst, self.unit()) },
             count => {
                 let dst = dst as isize;
                 let src = src as isize;
@@ -206,7 +206,7 @@ impl Rearranging {
                         src += k * src_strides[i];
                         rem %= s
                     }
-                    copy_nonoverlapping::<u8>(src as _, dst as _, self.unit())
+                    unsafe { copy_nonoverlapping::<u8>(src as _, dst as _, self.unit()) }
                 })
             }
         }
