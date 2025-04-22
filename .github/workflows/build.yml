@@ -26,16 +26,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Use beta toolchain
-        run: |
-          rustup toolchain install beta --component rustfmt clippy
-          rustup default beta
+      - name: Use latest toolchain
+        run: rustup update
 
       - name: Check format
         run: cargo fmt --check
 
       - name: Run test
-        run: cargo test
+        run: cargo test --release
 
       - name: Install required cargo
         run: cargo install clippy-sarif sarif-fmt
@@ -44,6 +42,7 @@ jobs:
         run:
           cargo clippy
           --all-features
+          --all-targets
           --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
         continue-on-error: true
 
@@ -52,3 +51,18 @@ jobs:
         with:
           sarif_file: rust-clippy-results.sarif
           wait-for-processing: true
+
+      - name: Install required cargo
+        run: cargo install cargo-tarpaulin
+
+      - name: Generate code coverage
+        run:
+          cargo tarpaulin
+          --all-features
+          --workspace --timeout 120 --out xml
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          fail_ci_if_error: true

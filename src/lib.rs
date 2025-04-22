@@ -26,6 +26,8 @@ pub enum SchemeError {
 
 impl Rearranging {
     /// 从输出布局、输入布局和单元规模构造重排方案。
+    ///
+    /// 单元规模 `unit` 是数组中单个元素的字节数。
     pub fn new<const M: usize, const N: usize>(
         dst: &ArrayLayout<M>,
         src: &ArrayLayout<N>,
